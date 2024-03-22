@@ -1,3 +1,5 @@
+import env from 'dotenv';
+
 
 const { Client } = require('@notionhq/client');
 const { google } = require('googleapis');
@@ -6,12 +8,12 @@ const { google } = require('googleapis');
 
 // Set up Notion client
 const notion = new Client({
-    auth: 'YOUR_NOTION_API_KEY',
+    auth: env.NOTION_API_KEY,
 });
 
 // Set up Google Calendar client
 const auth = new google.auth.GoogleAuth({
-    keyFile: 'YOUR_GOOGLE_SERVICE_ACCOUNT_KEY_FILE',
+    keyFile: env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
     scopes: ['https://www.googleapis.com/auth/calendar'],
 });
 const calendar = google.calendar({ version: 'v3', auth });
@@ -21,7 +23,7 @@ async function syncCalendars() {
     try {
         // Fetch events from Notion calendar
         const notionEvents = await notion.calendar.events.list({
-            calendar_id: 'YOUR_NOTION_CALENDAR_ID',
+            calendar_id: env.NOTION_CALENDAR_ID,
         });
 
         // Iterate over Notion events and create/update corresponding events in Google Calendar
@@ -40,20 +42,20 @@ async function syncCalendars() {
 
             // Check if the event already exists in Google Calendar
             const existingEvent = await calendar.events.get({
-                calendarId: 'YOUR_GOOGLE_CALENDAR_ID',
+                calendarId: env.GOOGLE_CALENDAR_ID,
                 eventId: event.id,
             });
 
             // If the event exists, update it; otherwise, create a new event
             if (existingEvent) {
                 await calendar.events.update({
-                    calendarId: 'YOUR_GOOGLE_CALENDAR_ID',
+                    calendarId: env.GOOGLE_CALENDAR_ID,
                     eventId: event.id,
                     resource: googleEvent,
                 });
             } else {
                 await calendar.events.insert({
-                    calendarId: 'YOUR_GOOGLE_CALENDAR_ID',
+                    calendarId: env.GOOGLE_CALENDAR_ID,
                     resource: googleEvent,
                 });
             }
